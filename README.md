@@ -95,6 +95,43 @@ kubectl-matrix/
 
 ---
 
+## 🛠 Add or Update kubectl Versions
+
+All versions are listed in [`versions.txt`](./versions.txt).  
+To add a new version:
+
+1. Append it to the file:
+
+   ```bash
+   echo "1.33.0" >> versions.txt
+   ```
+
+2. Run the bootstrap script:
+
+   ```bash
+   ./bootstrap.sh
+   ```
+
+   This will:
+   - Generate temporary folders like `tmp/1.33/`
+   - Use `Dockerfile.template` to build the image
+   - Tag it as `devopscloudycontainers/kubectl:1.33`
+   - Push it to Docker Hub
+
+3. (Optional) Clean up:
+
+   ```bash
+   rm -rf tmp/
+   ```
+
+You can also re-run the script to **rebuild all existing versions** listed in `versions.txt`.
+
+```bash
+./bootstrap.sh
+```
+
+---
+
 ## 💡 Tips
 
 - Shell completions for `kubectl`, `stern`, `krew` plugins, etc. can be added to `~/.zsh/completions/`
