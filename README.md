@@ -1,7 +1,7 @@
 # 🧰 kubectl-matrix
 
-**Multi-version, containerized `kubectl` CLI setup** with essential krew plugins. Run multiple versions of `kubectl` (1.28 – 1.32) side-by-side without polluting your system.  
-Perfect for EKS version-specific tooling, testing, and CI environments.
+**Multi-version, Dockerized `kubectl` CLI** with essential plugins.  
+Run different Kubernetes versions (1.28–1.32) side-by-side, cleanly and consistently, with zero setup beyond Docker.
 
 ---
 
@@ -13,107 +13,74 @@ Perfect for EKS version-specific tooling, testing, and CI environments.
 - `v1.31`
 - `v1.32`
 
-Each container includes:
+Each image includes:
 
 - `kubectl`
-- [krew](https://krew.sigs.k8s.io/) with plugins:
+- [krew](https://krew.sigs.k8s.io/) and essential plugins:
   - `ctx`, `ns`, `tree`, `ktop`, `whoami`, `neat`
   - `df-pv`, `get-all`, `access-matrix`, `resource-capacity`, `sniff`
 
 ---
 
-## ⚙️ Usage
+## ⚙️ Usage (with Prebuilt Docker Hub Images)
 
-### 🖥 Local Setup
+You **do not need to build anything locally**. Just use the aliases below or the runner script.
 
-1. Clone the repo:
+### 1. Create runner script
 
-   ```bash
-   git clone git@github.com:<your-username>/kubectl-matrix.git
-   cd kubectl-matrix
-   ```
-
-2. Build all versions:
-
-   ```bash
-   ./bootstrap.sh
-   ```
-
-3. Copy the runner script to `~/bin`:
-
-   ```bash
-   cp kubectl-container ~/bin/kubectl-container
-   chmod +x ~/bin/kubectl-container
-   ```
-
-4. Define aliases in your shell config (`~/.zshrc.aliases` or similar):
-
-   ```bash
-   alias k128='kubectl-container 1.28'
-   alias k129='kubectl-container 1.29'
-   alias k130='kubectl-container 1.30'
-   alias k131='kubectl-container 1.31'
-   alias k132='kubectl-container 1.32'
-   ```
-
-5. Reload your shell:
-
-   ```bash
-   exec zsh
-   ```
-
-### ✅ Example Commands
+Save this as `~/bin/kubectl-container`:
 
 ```bash
-k128 version               # Use kubectl v1.28
-k130 get nodes             # Use kubectl v1.30
-k132 config use-context dev-cluster
+#!/usr/bin/env bash
+
+version="$1"
+shift
+
+image="devopscloudycontainers/kubectl:${version}"
+docker run --rm -it \
+  -v "$HOME/.kube:/root/.kube" \
+  -v "$HOME/.aws:/root/.aws" \
+  --network host \
+  "$image" "$@"
+```
+
+Then:
+
+```bash
+chmod +x ~/bin/kubectl-container
+```
+
+### 2. Add aliases to your shell config (e.g. `~/.zshrc.aliases`)
+
+```bash
+alias k128='kubectl-container 1.28'  # kubectl for EKS 1.28
+alias k129='kubectl-container 1.29'
+alias k130='kubectl-container 1.30'
+alias k131='kubectl-container 1.31'
+alias k132='kubectl-container 1.32'
+```
+
+Then reload:
+
+```bash
+exec zsh
 ```
 
 ---
 
-## 🐳 Docker Image Naming (Local)
-
-Each image is tagged:
+## ✅ Example Commands
 
 ```bash
-kubectl-matrix:1.28
-kubectl-matrix:1.29
-# etc.
+k128 version
+k129 get nodes
+k132 config use-context my-dev-cluster
 ```
 
 ---
 
-## ☁️ Optional: Push to Docker Hub
+## 📁 Repo Structure
 
-If publishing to Docker Hub:
-
-```bash
-docker tag kubectl-matrix:1.28 your-dockerhub-user/kubectl:1.28
-docker push your-dockerhub-user/kubectl:1.28
-```
-
-Update the `kubectl-container` script to pull from Docker Hub if desired.
-
----
-
-## 💡 Bonus Tips
-
-- Pair with zsh completions (`kubectl`, `stern`, `k9s`, etc.)
-- Optional `direnv` or `.tool-versions`-style switching per project
-- Mount custom kubeconfigs and AWS credentials into containers
-
----
-
-## 🧪 Requirements
-
-- Docker
-- Zsh or Bash (for aliases)
-- Optional: shell completions, `direnv`, etc.
-
----
-
-## 📁 Project Structure
+If you still want to build locally, use the files in this repo:
 
 ```
 kubectl-matrix/
@@ -122,9 +89,17 @@ kubectl-matrix/
 ├── 1.29/
 │   └── Dockerfile
 ├── ...
-├── bootstrap.sh
-└── kubectl-container     # runner script
+├── bootstrap.sh          # builds all versions locally
+└── kubectl-container     # runner script (shared above)
 ```
+
+---
+
+## 💡 Tips
+
+- Shell completions for `kubectl`, `stern`, `krew` plugins, etc. can be added to `~/.zsh/completions/`
+- Combine with `direnv` or `.tool-versions`-style switching per project
+- Images can be pulled from Docker Hub without any build
 
 ---
 
