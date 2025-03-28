@@ -41,7 +41,7 @@ docker run --rm -it \
   -v "$HOME/.kube:/root/.kube" \
   -v "$HOME/.aws:/root/.aws" \
   --network host \
-  "$image" "$@"
+  "$image" kubectl "$@"
 ```
 
 Then:
