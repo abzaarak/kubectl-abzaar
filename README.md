@@ -150,13 +150,21 @@ These tools are useful, but **intentionally excluded** from the container becaus
 | Kube-hunter, kubeaudit              | Better suited for scanning from outside or CI/CD                       |
 | Prometheus, Thanos                  | Server-side observability stacks                                       |
 | Dex, Permission Manager             | Cluster services                                                       |
-| Tilt, Skaffold, Telepresence        | Local dev tools, not CLI helpers                                       |
-| Karpenter                           | AWS-side component                                                     |
 | kured, flagger, Draino              | Daemons or controllers                                                 |
 | kube-cost                           | Analytics platform – better in-cluster                                 |
 | kube-fledged, localpath-provisioner | Node-level tools                                                       |
 | Kubevious                           | Browser GUI tool                                                       |
 | Mizu                                | Requires privileged mode – better as a separate container              |
+| kube-linter                         | Manifest linter to catch errors early                                  |
+| kube-bench                          | CIS Benchmark check, post-upgrade safety                               |
+| kubecfg                             | Preview/diff Kubernetes manifests before applying                      |
+| kubefwd                             | Dev tool for port-forwarding services locally                          |
+| telepresence                        | Intercept cluster traffic to your local app                            |
+| skaffold, tilt                      | CI dev loop, live sync for local dev                                   |
+| flux, tekton                        | CI/CD tools to automate deployments                                    |
+| vertical-pod-autoscaler             | Tunes pod resource requests/limits dynamically                         |
+| karpenter                           | Node autoscaling for EKS (controller-based)                            |
+| kubectl-node-shell                  | Privileged pod to shell into a node                                    |
 
 ---
 
