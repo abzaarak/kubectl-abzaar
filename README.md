@@ -134,6 +134,79 @@ To rebuild all images:
 
 ---
 
+## 🧪 Common Local Tools & Usage
+
+These tools are recommended to be installed **locally**, not containerized.
+
+### 🔹 `helm`
+```bash
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm install my-release bitnami/nginx
+helm upgrade my-release bitnami/nginx --set service.type=LoadBalancer
+helm uninstall my-release
+```
+
+### 🔹 `k9s`
+```bash
+k9s
+# Interactive terminal UI for Kubernetes
+```
+
+### 🔹 `stern`
+```bash
+stern my-pod-name
+stern -n my-namespace -l app=my-app
+```
+
+### 🔹 `kube-linter`
+```bash
+kube-linter lint ./manifests
+```
+
+### 🔹 `kube-bench`
+```bash
+kube-bench node
+```
+
+### 🔹 `kubecfg`
+```bash
+kubecfg show ./manifests
+kubecfg diff ./manifests
+kubecfg validate ./manifests
+```
+
+### 🔹 `kubefwd`
+```bash
+sudo kubefwd services -n my-namespace
+```
+
+### 🔹 `tilt`
+```bash
+tilt init
+tilt up
+```
+
+### 🔹 `skaffold`
+```bash
+skaffold dev
+skaffold run
+```
+
+### 🔹 `flux`
+```bash
+flux install
+flux create source git my-repo --url=https://github.com/my/repo --branch=main
+flux create kustomization my-app --source=GitRepository/my-repo --path="./deploy"
+```
+
+### 🔹 `telepresence`
+```bash
+telepresence connect
+telepresence intercept my-service --port 8080:http
+```
+
+---
+
 ## 🧠 Notes on Other Tools
 
 These tools are useful, but **intentionally excluded** from the container because they:
