@@ -1,19 +1,37 @@
 ARG KUBECTL_VERSION={{KUBECTL_VERSION}}
-FROM alpine:3.19
+FROM debian:bullseye-slim
+
+ARG KUBECTL_VERSION
+LABEL org.opencontainers.image.version="${KUBECTL_VERSION}"
 
 ENV KREW_ROOT=/root/.krew
 ENV PATH="${KREW_ROOT}/bin:/usr/local/bin:$PATH"
 
-RUN apk add --no-cache \
-      bash curl git unzip python3 py3-pip less groff jq zip \
- && curl -LO "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl" \
- && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
- && curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/krew-linux_amd64.tar.gz" \
- && tar zxvf krew-linux_amd64.tar.gz \
- && ./krew-linux_amd64 install krew \
- && kubectl krew install ctx ns tree ktop whoami neat df-pv get-all access-matrix resource-capacity sniff \
- && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
- && unzip awscliv2.zip \
- && ./aws/install \
- && rm -rf awscliv2.zip aws krew-linux_amd64* \
- && apk del py3-pip
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  curl ca-certificates git unzip zip tar less groff jq python3 python3-pip \
+  && echo "🔹 Downloading kubectl ${KUBECTL_VERSION}..." \
+  && curl -sSLO "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl" \
+  && install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl \
+  && echo "✅ kubectl installed" \
+  \
+  && echo "🔹 Installing krew..." \
+  && curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/krew-linux_amd64.tar.gz" \
+  && tar zxvf krew-linux_amd64.tar.gz \
+  && ./krew-linux_amd64 install krew \
+  && kubectl krew install \
+      ctx ns tree ktop whoami neat \
+      df-pv get-all access-matrix resource-capacity sniff \
+      rbac-tool cert-manager deprecations view-allocations outdated \
+  \
+  && echo "🔹 Installing stern..." \
+  && curl -L -o stern "https://github.com/stern/stern/releases/download/v1.28.0/stern_1.28.0_linux_amd64" \
+  && install -o root -g root -m 0755 stern /usr/local/bin/stern \
+  \
+  && echo "🔹 Installing AWS CLI v2..." \
+  && curl -sS -o awscliv2.zip "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+  && unzip awscliv2.zip \
+  && ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update \
+  \
+  && echo "🧼 Cleaning up..." \
+  && rm -rf awscliv2.zip aws krew-linux_amd64* stern kubectl \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*

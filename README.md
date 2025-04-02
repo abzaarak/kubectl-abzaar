@@ -19,6 +19,9 @@ Each image includes:
 - [krew](https://krew.sigs.k8s.io/) and essential plugins:
   - `ctx`, `ns`, `tree`, `ktop`, `whoami`, `neat`
   - `df-pv`, `get-all`, `access-matrix`, `resource-capacity`, `sniff`
+  - `rbac-tool`, `cert-manager`, `deprecations`, `view-allocations`, `outdated`
+- `stern` (aggregated logs viewer)
+- `aws` CLI v2
 
 ---
 
@@ -44,7 +47,7 @@ docker run --rm -it \
   "$image" kubectl "$@"
 ```
 
-Then:
+Then make it executable:
 
 ```bash
 chmod +x ~/bin/kubectl-container
@@ -53,7 +56,7 @@ chmod +x ~/bin/kubectl-container
 ### 2. Add aliases to your shell config (e.g. `~/.zshrc.aliases`)
 
 ```bash
-alias k128='kubectl-container 1.28'  # kubectl for EKS 1.28
+alias k128='kubectl-container 1.28'
 alias k129='kubectl-container 1.29'
 alias k130='kubectl-container 1.30'
 alias k131='kubectl-container 1.31'
@@ -74,30 +77,29 @@ exec zsh
 k128 version
 k129 get nodes
 k132 config use-context my-dev-cluster
+k131 get pods -n kube-system
 ```
 
 ---
 
 ## 📁 Repo Structure
 
-If you still want to build locally, use the files in this repo:
-
 ```
 kubectl-matrix/
-├── 1.28/
-│   └── Dockerfile
-├── 1.29/
-│   └── Dockerfile
-├── ...
-├── bootstrap.sh          # builds all versions locally
-└── kubectl-container     # runner script (shared above)
+├── Dockerfile.template         # Single dynamic Dockerfile template
+├── versions.txt                # List of kubectl versions to build
+├── bootstrap.sh                # Script to build, tag, push, and test
+├── README.md                   # You're reading it :)
+├── .gitignore
+~/bin/
+└── kubectl-container           # Runner script (outside repo, symlink or personal bin path)
 ```
 
 ---
 
 ## 🛠 Add or Update kubectl Versions
 
-All versions are listed in [`versions.txt`](./versions.txt).  
+All versions are listed in [`versions.txt`](./versions.txt).
 To add a new version:
 
 1. Append it to the file:
@@ -113,10 +115,10 @@ To add a new version:
    ```
 
    This will:
-   - Generate temporary folders like `tmp/1.33/`
    - Use `Dockerfile.template` to build the image
-   - Tag it as `devopscloudycontainers/kubectl:1.33`
+   - Tag it as `devopscloudycontainers/kubectl:<short_version>`
    - Push it to Docker Hub
+   - Run basic tests for `kubectl` and `aws`
 
 3. (Optional) Clean up:
 
@@ -124,11 +126,37 @@ To add a new version:
    rm -rf tmp/
    ```
 
-You can also re-run the script to **rebuild all existing versions** listed in `versions.txt`.
+To rebuild all images:
 
 ```bash
 ./bootstrap.sh
 ```
+
+---
+
+## 🧠 Notes on Other Tools
+
+These tools are useful, but **intentionally excluded** from the container because they:
+
+- Require privileged access
+- Run better natively
+- Belong in CI/CD or cluster-side setups
+
+| Tool                                | Reason                                                                 |
+|-------------------------------------|------------------------------------------------------------------------|
+| Helm                                | Needs its own versioning, best kept outside image per project          |
+| K9s                                 | Interactive TUI, better run natively                                   |
+| Inspektor Gadget                    | Requires kernel-level access – not container-friendly                  |
+| Kube-hunter, kubeaudit              | Better suited for scanning from outside or CI/CD                       |
+| Prometheus, Thanos                  | Server-side observability stacks                                       |
+| Dex, Permission Manager             | Cluster services                                                       |
+| Tilt, Skaffold, Telepresence        | Local dev tools, not CLI helpers                                       |
+| Karpenter                           | AWS-side component                                                     |
+| kured, flagger, Draino              | Daemons or controllers                                                 |
+| kube-cost                           | Analytics platform – better in-cluster                                 |
+| kube-fledged, localpath-provisioner | Node-level tools                                                       |
+| Kubevious                           | Browser GUI tool                                                       |
+| Mizu                                | Requires privileged mode – better as a separate container              |
 
 ---
 
