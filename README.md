@@ -1,4 +1,4 @@
-# 🧰 kubectl-matrix
+# 🧰 kubectl-abzaar
 
 **Multi-version, Dockerized `kubectl` CLI** with essential plugins.  
 Run different Kubernetes versions (1.28–1.32) side-by-side, cleanly and consistently, with zero setup beyond Docker.
@@ -85,7 +85,7 @@ k131 get pods -n kube-system
 ## 📁 Repo Structure
 
 ```
-kubectl-matrix/
+kubectl-abzaar/
 ├── Dockerfile.template         # Single dynamic Dockerfile template
 ├── versions.txt                # List of kubectl versions to build
 ├── bootstrap.sh                # Script to build, tag, push, and test
