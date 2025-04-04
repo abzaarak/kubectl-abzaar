@@ -1,2 +1,21 @@
+# macOS and editor junk
+.DS_Store
+*.swp
+*.tmp
+
+# Local scripts or symlinks
+l.*
+
+# Temporary build output
 tmp/
-1.*/
+
+# Docker build cache/output
+build.log
+build-metrics.csv
+
+# Container cache and local images (if any are output)
+*.tar
+*.img
+
+# Generated manifests or configs (if applicable)
+*.yaml.generated
